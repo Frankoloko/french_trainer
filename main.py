@@ -26,6 +26,8 @@ class FrenchTrainer():
         window.setLayout(self.BUILD_main_layout())
         window.show()
 
+        self.UTILITY_reset_game()
+
         sys.exit(app.exec_()) # IF YOU ARE NOT IN MAYA OR SOME OTHER DCC, USE THIS
 
     def BUILD_main_layout(self):
@@ -46,11 +48,15 @@ class FrenchTrainer():
         self.LBL_answer = QtWidgets.QLabel()
         self.LED_guess = QtWidgets.QLineEdit()
 
-        self.BTN_next = QtWidgets.QPushButton("Start")
+        self.LED_guess.returnPressed.connect(self.CONNECT_enter_pressed)
+
+        self.BTN_start = QtWidgets.QPushButton("Start")
+        self.BTN_next = QtWidgets.QPushButton("Next")
+        self.BTN_start.clicked.connect(self.CONNECT_button_start)
         self.BTN_next.clicked.connect(self.CONNECT_button_next)
 
-        self.LBL_correct = QtWidgets.QLabel('Correct: 0')
-        self.LBL_wrong = QtWidgets.QLabel('Wrong: 0')
+        self.LBL_correct = QtWidgets.QLabel()
+        self.LBL_wrong = QtWidgets.QLabel()
 
         # Line spacer
         FRM_line = QtWidgets.QFrame()
@@ -62,6 +68,7 @@ class FrenchTrainer():
         layout.addWidget(LBL_test_range)
         layout.addWidget(self.SBX_from)
         layout.addWidget(self.SBX_to)
+        layout.addWidget(self.BTN_start)
         layout.addWidget(FRM_line)
         layout.addWidget(self.LBL_question)
         layout.addWidget(self.LED_guess)
@@ -72,6 +79,33 @@ class FrenchTrainer():
 
         return layout
 
+    def CONNECT_enter_pressed(self):
+        '''
+            This is triggered when the Enter keyboard button is pressed
+        '''
+        self.CONNECT_button_next()
+
+    def CONNECT_button_start(self):
+        '''
+            The Start/Restart button's logic
+        '''
+        if self.BTN_start.text() == 'Start':
+            # START LOGIC
+            self.BTN_start.setText('Restart')
+        else:
+            # RESTART LOGIC
+            pass
+
+        # Set the min and max values
+        min = int(self.SBX_from.value())
+        max = int(self.SBX_to.value()) + 1
+        self.indexes_remaining = list(range(min, max))
+
+        self.UTILITY_reset_game()
+        self.LED_guess.setFocus()
+
+        self.CONNECT_button_next()
+
     def CONNECT_button_next(self):
         '''
             The function that is run when the next button is pressed
@@ -79,13 +113,7 @@ class FrenchTrainer():
         if 'SCORE' in self.BTN_next.text():
             return
 
-        if 'Start' in self.BTN_next.text():
-            # Set the min and max values
-            min = int(self.SBX_from.value())
-            max = int(self.SBX_to.value()) + 1
-            self.indexes_remaining = list(range(min, max))
-
-        if 'Next' in self.BTN_next.text() or 'Start' in self.BTN_next.text():
+        if 'Next' in self.BTN_next.text():
             # DISPLAY NEXT WORD
 
             # If we are done with all the guesses, post the result
@@ -98,6 +126,7 @@ class FrenchTrainer():
                 self.LBL_question.clear()
                 self.LBL_answer.clear()
                 self.LED_guess.clear()
+                self.BTN_start.setFocus()
                 return
             
             # Remove the next item from the list
@@ -133,7 +162,7 @@ class FrenchTrainer():
             if self.LED_guess.text().lower() == correct_answer:
                 button_text = 'Correct...Next'
                 current_value = int(self.LBL_correct.text().replace('Correct: ', ''))
-                self.LBL_correct.setText('Wrong: ' + str(current_value + 1))
+                self.LBL_correct.setText('Correct: ' + str(current_value + 1))
             else:
                 button_text = 'Wrong...Next'
                 current_value = int(self.LBL_wrong.text().replace('Wrong: ', ''))
@@ -148,6 +177,17 @@ class FrenchTrainer():
         '''
         data = JsoncParser.parse_file(file)
         return data
+
+    def UTILITY_reset_game(self):
+        '''
+            This "Resets" the game, as in, clears all fields and so on.
+        '''
+        self.LBL_question.clear()
+        self.LBL_answer.clear()
+        self.LED_guess.clear()
+        self.BTN_next.setText('Next')
+        self.LBL_correct.setText('Correct: 0')
+        self.LBL_wrong.setText('Wrong: 0')
 
 instannce = FrenchTrainer()
 instannce.RUN()

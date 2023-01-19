@@ -1,0 +1,2 @@
+- Remember your range selection by writing out to a temp file on your desktop
+- A restart button
