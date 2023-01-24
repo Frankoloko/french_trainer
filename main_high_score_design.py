@@ -200,7 +200,5 @@ class FrenchTrainer():
         with open("/Users/francois/Myne/Persoonlik/french_trainer/score.txt", "a") as file:
             file.write(new_line)
 
-        messagebox.showinfo("Title", "This is a pop-up window.")
-
 instannce = FrenchTrainer()
 instannce.RUN()
