@@ -2,6 +2,9 @@ import sys
 from PySide2 import QtCore, QtGui, QtWidgets
 from jsonc_parser.parser import JsoncParser
 import random
+from tkinter import messagebox
+from datetime import datetime
+from threading import Timer
 
 class FrenchTrainer():
     def __init__(self):
@@ -98,6 +101,10 @@ class FrenchTrainer():
 
         self.CONNECT_button_next()
 
+        r = Timer(3.0, self.UTILITY_timer)
+        r.start()
+
+
     def CONNECT_button_next(self):
         '''
             The function that is run when the next button is pressed
@@ -136,7 +143,6 @@ class FrenchTrainer():
                 self.LBL_answer.setText(f"{self.current_word['french']} ({self.current_word['pronunciation']})")
 
             # Check if the person guessed correctly
-            print(self.current_words)
             if self.LED_guess.text().lower() == correct_answer:
                 button_text = 'Correct...Next'
                 self.current_words[self.current_word_key]['correct_counter'] += 1
@@ -147,9 +153,14 @@ class FrenchTrainer():
                     self.LBL_current_score.setText('Score: ' + str(self.highest_added_word))
             else:
                 button_text = 'Wrong...Next'
+                self.total_errors += 1
                 self.current_words[self.current_word_key]['correct_counter'] -= 0
                 if self.current_words[self.current_word_key]['correct_counter'] < 0:
                     self.current_words[self.current_word_key]['correct_counter'] = 0
+
+            print('-----------')
+            for key, value in self.current_words.items():
+                print(value['french'], value['correct_counter'])
 
             # Set the button's next text
             self.BTN_next.setText(button_text)
@@ -169,6 +180,27 @@ class FrenchTrainer():
         self.LBL_answer.clear()
         self.LED_guess.clear()
         self.BTN_next.setText('Next')
+        self.total_errors = 0
+
+    def UTILITY_timer(self):
+        '''
+            This is a timer that will run for 10 minutes
+        '''
+        ###############################################################
+        # Timer finished
+        print("Timer is done.")
+
+        # # Get the current date and time
+        now = datetime.now()
+        date_time = now.strftime("%m/%d/%Y %H:%M:%S")
+
+        new_line = f"\n{date_time} \t Errors: {self.total_errors} \t Highest Word: {self.highest_added_word}"
+
+        # # Write the new values to a text file
+        with open("/Users/francois/Myne/Persoonlik/french_trainer/score.txt", "a") as file:
+            file.write(new_line)
+
+        messagebox.showinfo("Title", "This is a pop-up window.")
 
 instannce = FrenchTrainer()
 instannce.RUN()
